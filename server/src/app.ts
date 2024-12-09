@@ -3,6 +3,19 @@
 import express from "express";
 
 const app = express();
+app.get("/", (req: express.Request, res: express.Response) => {
+  res.send("Welcome to Wild Series !");
+});
+
+// Configure it
+
+/* ************************************************************************* */
+
+// CORS Handling
+
+if (process.env.CLIENT_URL != null) {
+  app.use(cors({ origin: [process.env.CLIENT_URL] }));
+}
 
 // Configure it
 
