@@ -14,8 +14,8 @@ const router = express.Router();
 
 router.get("/api/programs", programActions.browse);
 router.get("/api/programs/:id", programActions.read);
-router.get("/api/categories", categoryActions.browse);
-router.get("/api/categories/:id", categoryActions.read);
+router.get("/categories", categoryActions.browse);
+router.get("/categories/:id", categoryActions.read);
 
 // Items routes
 router.get("/api/items", itemActions.browse);
