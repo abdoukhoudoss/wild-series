@@ -1,55 +1,69 @@
-// Some data to make the trick
-
-const programs = [
-  {
-    id: 1,
-    title: "The Good Place",
-    synopsis:
-      "À sa mort, Eleanor Shellstrop est envoyée au Bon Endroit, un paradis fantaisiste réservé aux individus exceptionnellement bienveillants. Or Eleanor n'est pas exactement une « bonne personne » et comprend vite qu'il y a eu erreur sur la personne. Avec l'aide de Chidi, sa prétendue âme sœur dans l'au-delà, la jeune femme est bien décidée à se redécouvrir.",
-    poster:
-      "https://img.betaseries.com/JwRqyGD3f9KvO_OlfIXHZUA3Ypw=/600x900/smart/https%3A%2F%2Fpictures.betaseries.com%2Ffonds%2Fposter%2F94857341d71c795c69b9e5b23c4bf3e7.jpg",
-    country: "USA",
-    year: 2016,
-  },
-  {
-    id: 2,
-    title: "Dark",
-    synopsis:
-      "Quatre familles affolées par la disparition d'un enfant cherchent des réponses et tombent sur un mystère impliquant trois générations qui finit de les déstabiliser.",
-    poster:
-      "https://img.betaseries.com/zDxfeFudy3HWjxa6J8QIED9iaVw=/600x900/smart/https%3A%2F%2Fpictures.betaseries.com%2Ffonds%2Fposter%2Fc47135385da176a87d0dd9177c5f6a41.jpg",
-    country: "Allemagne",
-    year: 2017,
-  },
-];
-
-// Declare the action
 import type { RequestHandler } from "express";
+import programRepository from "./programRepository";
 
-const browse: RequestHandler = (req, res) => {
-  if (req.query.q != null) {
-    const filteredPrograms = programs.filter((program) =>
-      program.synopsis.includes(req.query.q as string),
-    );
-
-    res.json(filteredPrograms);
-  } else {
-    res.json(programs);
-  }
+const browse: RequestHandler = async (req, res) => {
+  const programsFromDB = await programRepository.readAll();
+  res.json(programsFromDB);
 };
 
-const read: RequestHandler = (req, res) => {
+const read: RequestHandler = async (req, res) => {
+  const programsFromDB = await programRepository.readAll();
   const parsedId = Number.parseInt(req.params.id);
+  const program = programsFromDB.find((p) => p.id === parsedId);
 
-  const program = programs.find((p) => p.id === parsedId);
-
-  if (program != null) {
+  if (program) {
     res.json(program);
   } else {
     res.sendStatus(404);
   }
 };
 
-// Export them to import them somewhere else
+const create: RequestHandler = async (req, res) => {
+  const programsFromDB = await programRepository.readAll();
+  const newId = programsFromDB.length + 1;
+  const newProgram = {
+    id: newId,
+    title: req.body.title,
+    synopsis: req.body.synopsis,
+    poster: req.body.poster,
+    country: req.body.country,
+    year: req.body.year,
+    category_id: req.body.category_id,
+  };
+  programsFromDB.push(newProgram);
+  res.status(201).json(newProgram);
+};
 
-export default { browse, read };
+const update: RequestHandler = async (req, res) => {
+  const programsFromDB = await programRepository.readAll();
+  const parsedId = Number.parseInt(req.params.id);
+  const index = programsFromDB.findIndex((p) => p.id === parsedId);
+
+  if (index !== -1) {
+    programsFromDB[index] = { ...programsFromDB[index], ...req.body };
+    res.json(programsFromDB[index]);
+  } else {
+    res.sendStatus(404);
+  }
+};
+
+const destroy: RequestHandler = async (req, res) => {
+  const programsFromDB = await programRepository.readAll();
+  const parsedId = Number.parseInt(req.params.id);
+  const index = programsFromDB.findIndex((p) => p.id === parsedId);
+
+  if (index !== -1) {
+    programsFromDB.splice(index, 1);
+    res.sendStatus(204);
+  } else {
+    res.sendStatus(404);
+  }
+};
+
+export default {
+  browse,
+  read,
+  create,
+  update,
+  destroy,
+};

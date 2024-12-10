@@ -1,6 +1,8 @@
-// Load the express module to create a web application
-
+import fs from "node:fs";
+import path from "node:path";
+import cors from "cors";
 import express from "express";
+import router from "./router";
 
 const app = express();
 
@@ -8,21 +10,10 @@ if (process.env.CLIENT_URL != null) {
   app.use(cors({ origin: [process.env.CLIENT_URL] }));
 }
 
-import cors from "cors";
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-if (process.env.CLIENT_URL != null) {
-  app.use(cors({ origin: [process.env.CLIENT_URL] }));
-}
-
-import router from "./router";
-
-// Mount the API router under the "/api" endpoint
-app.use("/api", router);
-
-import fs from "node:fs";
-import path from "node:path";
-
-// Serve server resources
+app.use(router);
 
 const publicFolderPath = path.join(__dirname, "../../server/public");
 
